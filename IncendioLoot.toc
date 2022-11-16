@@ -2,3 +2,5 @@
 ## Titel: Incendio Loot
 ## Notes: Lootaddon for Incendio Guild
 ## Version: 0.1
+
+embeds.xml
