@@ -1,24 +1,27 @@
 local addonName, addon = ...
-local IncendioLoot = _G[ addonName ]
+local IncendioLoot = _G[addonName]
 local AceConsole = LibStub("AceConsole-3.0")
 IncendioLoot.LootCouncil = {}
 
 --[[
     Event handling
-]]--
+]] --
 
-function IncendioLoot.LootCouncil:HandleLootLootedEvent()
+function HandleLootLootedEvent()
     -- TBD
 end
 
-function IncendioLoot.LootCouncil:HandleLootVoteCastEvent()
+function HandleLootVoteCastEvent()
     -- TBD
 end
 
-function IncendioLoot.LootCouncil:HandleLootDistributedEvent()
+function HandleLootDistributedEvent()
     -- TBD
 end
 
-IncendioLoot:RegisterMessage(IncendioLoot.EVENTS.EVENT_LOOT_LOOTED, IncendioLoot.LootCouncil.HandleLootLootedEvent)
-IncendioLoot:RegisterMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_CAST, IncendioLoot.LootCouncil.HandleLootVoteCastEvent)
-IncendioLoot:RegisterMessage(IncendioLoot.EVENTS.EVENT_LOOT_DISTRIBUTED, IncendioLoot.LootCouncil.HandleLootDistributedEvent)
+IncendioLoot:RegisterMessage(IncendioLoot.EVENTS.EVENT_LOOT_LOOTED,
+                             HandleLootLootedEvent)
+IncendioLoot:RegisterMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_CAST,
+                             HandleLootVoteCastEvent)
+IncendioLoot:RegisterMessage(IncendioLoot.EVENTS.EVENT_LOOT_DISTRIBUTED,
+                             HandleLootDistributedEvent)
