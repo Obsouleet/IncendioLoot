@@ -2,6 +2,7 @@
 ## Titel: Incendio Loot
 ## Notes: Lootaddon for Incendio Guild
 ## Version: 0.1
+## SavedVariables: IncendioLootDB
 
 embeds.xml
 src/IncendioLoot.lua
