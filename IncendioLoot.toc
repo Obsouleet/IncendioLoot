@@ -1,6 +1,8 @@
-## Interface: 10000
+## Interface: 10002
 ## Titel: Incendio Loot
 ## Notes: Lootaddon for Incendio Guild
 ## Version: 0.1
 
 embeds.xml
+src/IncendioLoot.lua
+src/LootCouncil.lua
