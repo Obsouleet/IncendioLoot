@@ -11,10 +11,7 @@ local LibCompress = LibStub:GetLibrary("LibCompress")
 --[[
     Event handling
 ]] --
-local function HandleLootLootedEvent(prefix, str, distribution, sender)
-    local _, data = LootCouncil:Deserialize(str)
-    AceConsole:Print(data)
-end
+
 
 local function HandleLootVoteCastEvent(prefix, str, distribution, sender)
     local _, data = LootCouncil:Deserialize(str)
@@ -33,13 +30,9 @@ end
 
 function LootCouncil:OnInitialize()
     LibStub("AceComm-3.0"):Embed(LootCouncil)
-    LootCouncil:RegisterComm(IncendioLoot.EVENTS.EVENT_LOOT_LOOTED,
-                             HandleLootLootedEvent)
-    LootCouncil:RegisterComm(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_CAST,
-                             HandleLootVoteCastEvent)
+    
     LootCouncil:RegisterComm(IncendioLoot.EVENTS.EVENT_LOOT_DISTRIBUTED,
                              HandleLootDistributedEvent)
     LootCouncil:RegisterComm(IncendioLoot.EVENTS.EVENT_LOOT_SESSION_STARTED,
                              HandleLootSessionStartedEvent)
-    IncendioLoot.LootUtil:SendLootEvent("someItem", "somePlayer", "someBoss")
 end
