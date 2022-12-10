@@ -21,7 +21,8 @@ IncendioLoot.EVENTS = {
     EVENT_LOOT_LOOTED = "IL.LLooted", -- whenever a member loots an item
     EVENT_LOOT_VOTE_CAST = "IL.LVoteCast", -- whenever a loot council member votes on an item
     EVENT_LOOT_DISTRIBUTED = "IL.LDist", -- whenever the council distributes an item
-    EVENT_LOOT_VOTE_PLAYER = "IL.LVotedPlayer" -- whenever a player sets a vote on an item
+    EVENT_LOOT_VOTE_PLAYER = "IL.LVotedPlayer", -- whenever a player sets a vote on an item
+    EVENT_CHAT_SENT = "IL.CSent" -- whenever a chat is
 }
 
 local function HandleVersionCheckEvent(prefix, str, distribution, sender)
