@@ -59,6 +59,4 @@ end
 function IncendioLoot:OnEnable()
     IncendioLoot:RegisterComm(IncendioLoot.EVENTS.EVENT_VERSION_CHECK, HandleVersionCheckEvent)
     IncendioLoot:RegisterEvent("GROUP_ROSTER_UPDATE", HandleGroupRosterUpdate)
-
-    HandleGroupRosterUpdate()
 end
