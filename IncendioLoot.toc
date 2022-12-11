@@ -1,11 +1,10 @@
 ## Interface: 10002
 ## Titel: Incendio Loot
 ## Notes: Lootaddon for Incendio Guild
-## Version: 0.1
-## SavedVariables: IncendioLootDB
+## Version: 0.3
+## SavedVariables: IncendioLootHistoryDB, IncendioLootOptionsDB
 
 embeds.xml
 src/IncendioLoot.lua
 src/LootCouncil.lua
 src/LootVoting.lua 
-src/LootCouncilGUI.lua
