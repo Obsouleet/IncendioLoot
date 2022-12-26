@@ -1,6 +1,5 @@
 local addonName, addon = ...
 local IncendioLoot = _G[addonName]
-local Equippable
 local FrameOpen
 local LootVoting = IncendioLoot:NewModule("LootVoting", "AceConsole-3.0", "AceEvent-3.0", "AceSerializer-3.0")
 local LootVotingGUI = LibStub("AceGUI-3.0")
@@ -10,10 +9,12 @@ local rollStates = {
     {type = "UPGRADE", name = "Upgrade"},
     {type = "SECOND", name = "Secondspeck"},
     {type = "OTHER", name = "Anderes"},
-    {type = "TRANSMOG", name = "Transmog"}
+    {type = "TRANSMOG", name = "Transmog"},
+    {type = "PASS", name = "Passen"}
 }
 local VotingMainFrameClose
 local VotingButtonFrameCLose
+local ViableLootAvailable
 IncendioLootLootVoting = {}
 
 local function CreateRollButton(ItemGroup, rollState, ItemLink, Index)
@@ -29,7 +30,7 @@ local function CreateRollButton(ItemGroup, rollState, ItemLink, Index)
             ItemGroup.frame:Hide()
         end
     end)
-    button:SetWidth(100)
+    button:SetWidth(92)
     return button
 end
 
@@ -42,6 +43,26 @@ function IncendioLootLootVoting.CloseGUI()
         LootVotingGUI:Release(VotingButtonFrameCLose)
         FrameOpen = false
     end
+    ChildCount = 0
+end
+
+local function AutoPass()
+    ViableLootAvailable = false;
+    local AutoPassLootTable = IncendioLootDataHandler.GetLootTable()
+    local AutoPassViableLoot = IncendioLootDataHandler.GetViableLoot()
+    for key, Item in pairs(AutoPassLootTable) do
+        if type(Item) == "table" then
+            local ItemName = Item.ItemName
+            if AutoPassViableLoot[ItemName] == nil then
+                local ItemLink = Item.ItemLink
+                local Index = Item.Index
+                local _, AverageItemLevel = GetAverageItemLevel()
+                LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ ItemLink = ItemLink,  rollType = IncendioLoot.STATICS.DID_AUTO_PASS, Index = Index, iLvl = AverageItemLevel }), IsInRaid() and "RAID" or "PARTY")
+            else
+                ViableLootAvailable = true
+            end
+        end
+    end
 end
 
 local function HandleLooted()
@@ -51,6 +72,11 @@ local function HandleLooted()
         return
     end
     if (not IncendioLootDataHandler.GetSessionActive()) or FrameOpen then
+        return
+    end
+
+    AutoPass()
+    if not ViableLootAvailable then 
         return
     end
 
@@ -75,7 +101,6 @@ local function HandleLooted()
     CloseButtonFrame.frame:SetHeight(60)
     CloseButtonFrame.frame:Show()
 
-
     for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
         if type(Item) == "table" then
             local TexturePath = Item.TexturePath
@@ -83,32 +108,35 @@ local function HandleLooted()
             local ItemLink = Item.ItemLink
             local Index = Item.Index
 
-            local ItemGroup = LootVotingGUI:Create("InlineGroup")
-            ItemGroup:SetLayout("Flow") 
-            ItemGroup:SetFullWidth(true)
-            ItemGroup:SetHeight(70)
-            LootVotingMainFrame:AddChild(ItemGroup)
+            if (IncendioLootDataHandler.GetViableLoot()[ItemName] ~= nil) then
 
-            local IconWidget1 = LootVotingGUI:Create("InteractiveLabel")
-            IconWidget1:SetWidth(100)
-            IconWidget1:SetHeight(40)
-            IconWidget1:SetImageSize(40,40)
-            IconWidget1:SetImage(TexturePath)
-            IconWidget1:SetText(ItemName)
-            ItemGroup:AddChild(IconWidget1)
+                local ItemGroup = LootVotingGUI:Create("InlineGroup")
+                ItemGroup:SetLayout("Flow") 
+                ItemGroup:SetFullWidth(true)
+                ItemGroup:SetHeight(70)
+                LootVotingMainFrame:AddChild(ItemGroup)
 
-            IconWidget1:SetCallback("OnEnter", function()
-                GameTooltip:SetOwner(IconWidget1.frame, "ANCHOR_RIGHT")
-                GameTooltip:ClearLines()
-                GameTooltip:SetHyperlink(ItemLink)
-                GameTooltip:Show()
-            end)
-            IconWidget1:SetCallback("OnLeave", function()
-                GameTooltip:Hide();
-            end)
-            ChildCount = ChildCount + 1
-            for _, rollState in pairs(rollStates) do
-                ItemGroup:AddChild(CreateRollButton(ItemGroup, rollState, ItemLink, Index, CloseButtonFrame))
+                local IconWidget1 = LootVotingGUI:Create("InteractiveLabel")
+                IconWidget1:SetWidth(100)
+                IconWidget1:SetHeight(40)
+                IconWidget1:SetImageSize(40,40)
+                IconWidget1:SetImage(TexturePath)
+                IconWidget1:SetText(ItemName)
+                ItemGroup:AddChild(IconWidget1)
+
+                IconWidget1:SetCallback("OnEnter", function()
+                    GameTooltip:SetOwner(IconWidget1.frame, "ANCHOR_RIGHT")
+                    GameTooltip:ClearLines()
+                    GameTooltip:SetHyperlink(ItemLink)
+                    GameTooltip:Show()
+                end)
+                IconWidget1:SetCallback("OnLeave", function()
+                    GameTooltip:Hide();
+                end)
+                ChildCount = ChildCount + 1
+                for _, rollState in pairs(rollStates) do
+                    ItemGroup:AddChild(CreateRollButton(ItemGroup, rollState, ItemLink, Index, CloseButtonFrame))
+                end
             end
         end
     end
@@ -134,6 +162,10 @@ LootVotingGUI:RegisterLayout("ILVooting",
 )
 
 local function HandleLootLootedEvent(prefix, str, distribution, sender)
+    if not IncendioLoot.ILOptions.profile.options.general.active then 
+        return
+    end
+    
     local SetData = (not UnitIsGroupLeader("player") or 
         not IncendioLootFunctions.CheckIfMasterLooter()) and
         not IncendioLootDataHandler.GetSessionActive()
@@ -164,18 +196,49 @@ function LootVoting:OnEnable()
     end, "Zeigt das Loot-Vote-Fenster an.")
 end
 
+LootVoting:RegisterEvent("LOOT_OPENED", function (eventname, rollID)
+    if IncendioLoot.ILOptions.profile.options.general.debug then
+        local ViableLootRolls = {}
+            for ItemIndex = 1, GetNumLootItems(), 1 do
+                if (GetLootSlotType(ItemIndex) == Enum.LootSlotType.Item) then
+                    local _, ItemName, _, _, LootQuality = GetLootSlotInfo(ItemIndex)
+                    if (LootQuality >= 3) then
+                        if (math.random(1,100) > 50) then
+                            ViableLootRolls[ItemName] = true
+                        end
+                    end
+                end
+            end
+        if not rawequal(next(ViableLootRolls), nil) then
+                IncendioLootDataHandler.SetViableLoot(ViableLootRolls)
+            end
+        end
+    end
+)
+
 LootVoting:RegisterEvent("START_LOOT_ROLL", function (eventname, rollID)
-    local DoAutopass = (IncendioLoot.ILOptions.profile.options.general.autopass and
-        not UnitIsGroupLeader("player"))
-        
-    if not DoAutopass then
+    if not IncendioLoot.ILOptions.profile.options.general.active then 
         return
     end
+    IncendioLootDataHandler.WipeViableLootData()
 
+    local DoAutopass = (IncendioLoot.ILOptions.profile.options.general.autopass and
+        not UnitIsGroupLeader("player"))
+
+    local ViableLootRolls = {}
     local pendingLootRolls = GetActiveLootRollIDs()
     for i=1, #pendingLootRolls do
-        if not (pendingLootRolls == nil) then
-            RollOnLoot(pendingLootRolls[i], 0)
+        if (pendingLootRolls ~= nil) then
+            local _, ItemName, _, _, _, CanNeed = GetLootRollItemInfo(pendingLootRolls[i])
+            if DoAutopass then
+                RollOnLoot(pendingLootRolls[i], 0)
+            end
+            if CanNeed then
+                ViableLootRolls[ItemName] = CanNeed
+            end
         end
+    end
+    if not rawequal(next(ViableLootRolls), nil) then
+        IncendioLootDataHandler.SetViableLoot(ViableLootRolls)
     end
 end )
