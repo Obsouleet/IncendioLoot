@@ -57,6 +57,7 @@ local function BuildVoteData()
         PlayerTable = VoteData[index]
         for member = 1, GetNumGroupMembers(), 1 do 
             local name, _, _, _, class, _, zone , online = GetRaidRosterInfo(member)
+            local _, ClassFilename = UnitClass(name)
             PlayerInformation = {class = class, classID = ClassFilename, zone = zone, online = online, rollType = L["NO_VOTE"], iLvl = " ", name = name, roll = math.random(1,100), vote = 0, autodecision = 0, note = " "}
             PlayerTable[name] = PlayerInformation
         end
