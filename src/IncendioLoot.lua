@@ -129,8 +129,12 @@ local lootTypeColor = {
     ["PASS"] = IncendioLoot.COLORS.GREY
 }
 
+local function aRGBHexToaRGB(hex)
+    return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6)), tonumber("0x"..hex:sub(7,8))
+end
+
 function IncendioLoot:ColoredRollType(rollType)
-    return WrapTextInColorCode(rollType, lootTypeColor[rollType])
+    return aRGBHexToaRGB(lootTypeColor[rollType])
 end
 
 
