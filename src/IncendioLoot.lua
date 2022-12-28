@@ -127,7 +127,8 @@ local lootTypeColor = {
     ["OTHER"] = IncendioLoot.COLORS.YELLOW,
     ["TRANSMOG"] = IncendioLoot.COLORS.PURPLE,
     ["PASS"] = IncendioLoot.COLORS.GREY,
-    ["NO_VOTE"] = IncendioLoot.COLORS.GREY
+    ["NO_VOTE"] = IncendioLoot.COLORS.GREY,
+    ["DID_AUTO_PASS"] = IncendioLoot.COLORS.GREY
 }
 
 local function aRGBHexToaRGB(hex)
@@ -140,7 +141,7 @@ end
 
 
 
-local function CreateScrollCol(ColName, Width, sort, SortNext)
+local function CreateScrollCol(ColName, Width, sort, SortNext, cellFn)
     if sort and (SortNext == 0) then
         return {
             ["name"] = ColName,
@@ -148,10 +149,10 @@ local function CreateScrollCol(ColName, Width, sort, SortNext)
             ["align"] = "LEFT",
             ["colorargs"] = nil,
             ["defaultsort"] = "dcs",
-            ["DoCellUpdate"] = nil,
+            ["DoCellUpdate"] = cellFn,
         }
     end
-    print(SortNext)
+
     if sort and (SortNext > 0) then
         return {
             ["name"] = ColName,
@@ -160,9 +161,10 @@ local function CreateScrollCol(ColName, Width, sort, SortNext)
             ["colorargs"] = nil,
             ["defaultsort"] = "acs",
             ["sortnext"]= SortNext,
-            ["DoCellUpdate"] = nil,
+            ["DoCellUpdate"] = cellFn,
         }
     end
+
     return {
         ["name"] = ColName,
         ["width"] = Width,
@@ -172,7 +174,7 @@ local function CreateScrollCol(ColName, Width, sort, SortNext)
         ["comparesort"] = function (cella, cellb, column)
             --function?
         end,
-        ["DoCellUpdate"] = nil,
+        ["DoCellUpdate"] = cellFn,
     }
 end
 

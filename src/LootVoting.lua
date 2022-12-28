@@ -68,7 +68,7 @@ local function AutoPass()
                 local ItemLink = Item.ItemLink
                 local Index = Item.Index
                 local _, AverageItemLevel = GetAverageItemLevel()
-                LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ ItemLink = ItemLink,  rollType = L["DID_AUTO_PASS"], Index = Index, iLvl = AverageItemLevel }), IsInRaid() and "RAID" or "PARTY")
+                LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ ItemLink = ItemLink,  rollType = "DID_AUTO_PASS", Index = Index, iLvl = AverageItemLevel }), IsInRaid() and "RAID" or "PARTY")
             else
                 ViableLootAvailable = true
             end

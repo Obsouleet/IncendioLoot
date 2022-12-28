@@ -27,6 +27,8 @@ if GetLocale() == "deDE" then
     L["VOTE_STATE_TRANSMOG"] = "Transmog"
     L["VOTE_STATE_OTHER"] = "Anderes"
     L["VOTE_STATE_PASS"] = "-"
+    L["VOTE_STATE_NO_VOTE"] = "?"
+    L["VOTE_STATE_DID_AUTO_PASS"] = "Auto-Pass"
 
     -- Loot council
     L["COUNCIL_ASSIGNED_ITEM"] = "Das Item %s wurde an %s vergeben."

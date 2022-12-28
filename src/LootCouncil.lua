@@ -58,7 +58,7 @@ local function BuildVoteData()
         for member = 1, GetNumGroupMembers(), 1 do 
             local name, _, _, _, class, _, zone , online = GetRaidRosterInfo(member)
             local _, _, classID = UnitClass(name)
-            PlayerInformation = {class = class, classID = classID, zone = zone, online = online, rollType = L["NO_VOTE"], iLvl = " ", name = name, roll = math.random(1,100), vote = 0, autodecision = 0, note = " "}
+            PlayerInformation = {class = class, classID = classID, zone = zone, online = online, rollType = "NO_VOTE", iLvl = " ", name = name, roll = math.random(1,100), vote = 0, autodecision = 0, note = " "}
             PlayerTable[name] = PlayerInformation
         end
     end
@@ -153,7 +153,7 @@ function IncendioLootLootCouncil.BuildScrollData(VoteData, ItemIndex)
             { ["value"] = PlayerInformation.name, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },
             { ["value"] = PlayerInformation.zone },
             { ["value"] = tostring(PlayerInformation.online) },
-            { ["value"] = PlayerInformation.rollType, ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
+            { ["value"] = L["VOTE_STATE_"..PlayerInformation.rollType], ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
             { ["value"] = tostring(PlayerInformation.iLvl) },
             { ["value"] = tostring(PlayerInformation.roll) },
             { ["value"] = PlayerInformation.vote },

@@ -26,6 +26,8 @@ L["VOTE_STATE_SECOND"] = "Secondary"
 L["VOTE_STATE_TRANSMOG"] = "Transmog"
 L["VOTE_STATE_OTHER"] = "Other"
 L["VOTE_STATE_PASS"] = "-"
+L["VOTE_STATE_NO_VOTE"] = "?"
+L["VOTE_STATE_DID_AUTO_PASS"] = "Auto-Pass"
 
 -- loot council
 L["COUNCIL_ASSIGNED_ITEM"] = "The item %s was assigned to %s."

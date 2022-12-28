@@ -19,7 +19,7 @@ local function GetDataRows()
             local cols = {
                 { ["value"] = Content.PlayerName, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },
                 { ["value"] = Content.Class },
-                { ["value"] = Content.RollType, ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
+                { ["value"] = L["VOTE_STATE_"..Content.RollType], ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
                 { ["value"] = Content.ItemLink },
                 { ["value"] = Content.Instance },
                 { ["value"] = Content.Date },
@@ -44,7 +44,7 @@ local function FilterLootHistory(filterText, columnName)
                 local cols = {
                     { ["value"] = PlayerName, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },
                     { ["value"] = Content.Class },
-                    { ["value"] = Content.RollType, ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
+                    { ["value"] = L["VOTE_STATE_"..Content.RollType], ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
                     { ["value"] = Content.Roll },
                     { ["value"] = Content.ItemLink },
                     { ["value"] = Content.Instance },
