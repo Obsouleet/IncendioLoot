@@ -38,9 +38,9 @@ local function FilterLootHistory(filterText, columnName)
         for _, Content in ipairs(Players) do
             if string.find(string.lower(Content[columnName]), string.lower(filterText)) then
                 local cols = {
-                    { ["value"] = PlayerName },
+                    { ["value"] = WrapTextInColorCode(PlayerName, ClassColor)},
                     { ["value"] = Content.Class },
-                    { ["value"] = Content.RollType },
+                    { ["value"] = IncendioLoot:ColoredRollType(Content.RollType) },
                     { ["value"] = Content.Roll },
                     { ["value"] = Content.ItemLink },
                     { ["value"] = Content.Instance },
