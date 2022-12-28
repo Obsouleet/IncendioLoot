@@ -379,7 +379,7 @@ local function HandleLootVotePlayerEvent(prefix, str, distribution, sender)
     local ILvl = round(LootVote.iLvl)
     local Note = LootVote.Note
 
-    UpdateVoteData(NewIndex, name, NewRollType, ILvl, Note)
+    UpdateVoteData(NewIndex, sender, NewRollType, ILvl, Note)
     IncendioLootLootCouncilGUI.CreateScrollFrame(NewIndex)
 end
 

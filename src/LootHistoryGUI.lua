@@ -13,12 +13,13 @@ local function GetDataRows()
     local rows = {}
     for _, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
-            local _, _, _, ClassColor = GetClassColor(Content.ClassId)
+            local r, g, b = GetClassColor(PlayerInformation.classId)
+            local _, r2, g2, b2 = IncendioLoot:ColoredRollType(PlayerInformation.rollType)
 
             local cols = {
-                { ["value"] = WrapTextInColorCode(Content.PlayerName, ClassColor)},
+                { ["value"] = Content.PlayerName, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },
                 { ["value"] = Content.Class },
-                { ["value"] = IncendioLoot:ColoredRollType(Content.RollType) },
+                { ["value"] = Content.RollType, ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
                 { ["value"] = Content.ItemLink },
                 { ["value"] = Content.Instance },
                 { ["value"] = Content.Date },
@@ -37,10 +38,13 @@ local function FilterLootHistory(filterText, columnName)
     for PlayerName, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
             if string.find(string.lower(Content[columnName]), string.lower(filterText)) then
+                local r, g, b = GetClassColor(PlayerInformation.classId)
+                local _, r2, g2, b2 = IncendioLoot:ColoredRollType(PlayerInformation.rollType)
+
                 local cols = {
-                    { ["value"] = WrapTextInColorCode(PlayerName, ClassColor)},
+                    { ["value"] = PlayerName, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },
                     { ["value"] = Content.Class },
-                    { ["value"] = IncendioLoot:ColoredRollType(Content.RollType) },
+                    { ["value"] = Content.RollType, ["color"] = { ["r"] = r2, ["g"] = g2, ["b"] = b2 } },
                     { ["value"] = Content.Roll },
                     { ["value"] = Content.ItemLink },
                     { ["value"] = Content.Instance },
