@@ -9,7 +9,7 @@ local HistoryOpen
 local function GetDataRows()
     local i = 1
     local rows = {}
-    for _, Players in pairs(IncendioLoot.ILHistory.profile.history) do
+    for _, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
             local cols = {
                 { ["value"] = Content.PlayerName },
@@ -30,7 +30,7 @@ end
 local function FilterLootHistory(filterText, columnName)
     local filteredData = {}
     local i = 1
-    for PlayerName, Players in pairs(IncendioLoot.ILHistory.profile.history) do
+    for PlayerName, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
             if string.find(string.lower(Content[columnName]), string.lower(filterText)) then
                 local cols = {

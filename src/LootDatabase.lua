@@ -4,10 +4,10 @@ local LootDatabase = IncendioLoot:NewModule("LootDatabase", "AceEvent-3.0", "Ace
 IncendioLootLootDatabase = {}
 
 function IncendioLootLootDatabase.AddItemToDatabase(PlayerName, MapID, Class, Instance, RollType, ItemLink, Votes, Roll, DifficultyIndex, DifficultyName)
-    if IncendioLoot.ILHistory.profile.history[PlayerName] == nil then
-        IncendioLoot.ILHistory.profile.history[PlayerName] = {}
+    if IncendioLoot.ILHistory.factionrealm.history[PlayerName] == nil then
+        IncendioLoot.ILHistory.factionrealm.history[PlayerName] = {}
     end
-    table.insert(IncendioLoot.ILHistory.profile.history[PlayerName],{
+    table.insert(IncendioLoot.ILHistory.factionrealm.history[PlayerName],{
         PlayerName = PlayerName,
         MapID = MapID,
         Class = Class, 
@@ -24,7 +24,7 @@ function IncendioLootLootDatabase.AddItemToDatabase(PlayerName, MapID, Class, In
 end
 
 function IncendioLootLootDatabase.ReturnItemsLastTwoWeeksPlayer(PlayerName, RollType)
-    local table = IncendioLoot.ILHistory.profile.history[PlayerName]
+    local table = IncendioLoot.ILHistory.factionrealm.history[PlayerName]
     if table == nil then 
         return 0
     end
