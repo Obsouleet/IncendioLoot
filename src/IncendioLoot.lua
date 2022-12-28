@@ -130,7 +130,7 @@ local lootTypeColor = {
 }
 
 local function aRGBHexToaRGB(hex)
-    return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6)), tonumber("0x"..hex:sub(7,8))
+    return tonumber("0x"..hex:sub(1,2)) / 255, tonumber("0x"..hex:sub(3,4)) / 255, tonumber("0x"..hex:sub(5,6)) / 255, tonumber("0x"..hex:sub(7,8)) / 255
 end
 
 function IncendioLoot:ColoredRollType(rollType)

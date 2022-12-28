@@ -13,9 +13,9 @@ local function GetDataRows()
     local rows = {}
     for _, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
-            local r, g, b = GetClassColor(PlayerInformation.classId)
-            local _, r2, g2, b2 = IncendioLoot:ColoredRollType(PlayerInformation.rollType)
-
+            local r, g, b = GetClassColor(Content.ClassID)
+            local _, r2, g2, b2 = IncendioLoot:ColoredRollType(Content.RollType)
+            
             local cols = {
                 { ["value"] = Content.PlayerName, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },
                 { ["value"] = Content.Class },
@@ -38,8 +38,8 @@ local function FilterLootHistory(filterText, columnName)
     for PlayerName, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
             if string.find(string.lower(Content[columnName]), string.lower(filterText)) then
-                local r, g, b = GetClassColor(PlayerInformation.classId)
-                local _, r2, g2, b2 = IncendioLoot:ColoredRollType(PlayerInformation.rollType)
+                local r, g, b = GetClassColor(Content.ClassID)
+                local _, r2, g2, b2 = IncendioLoot:ColoredRollType(Content.RollType)
 
                 local cols = {
                     { ["value"] = PlayerName, ["color"] = { ["r"] = r, ["g"] = g, ["b"] = b } },

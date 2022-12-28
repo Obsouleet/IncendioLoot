@@ -57,8 +57,8 @@ local function BuildVoteData()
         PlayerTable = VoteData[index]
         for member = 1, GetNumGroupMembers(), 1 do 
             local name, _, _, _, class, _, zone , online = GetRaidRosterInfo(member)
-            local _, _, classId = UnitClass(name)
-            PlayerInformation = {class = class, classID = classId, zone = zone, online = online, rollType = L["NO_VOTE"], iLvl = " ", name = name, roll = math.random(1,100), vote = 0, autodecision = 0, note = " "}
+            local _, _, classID = UnitClass(name)
+            PlayerInformation = {class = class, classID = classID, zone = zone, online = online, rollType = L["NO_VOTE"], iLvl = " ", name = name, roll = math.random(1,100), vote = 0, autodecision = 0, note = " "}
             PlayerTable[name] = PlayerInformation
         end
     end
@@ -146,7 +146,7 @@ function IncendioLootLootCouncil.BuildScrollData(VoteData, ItemIndex)
 
     PlayerTable = VoteData[ItemIndex]
     for index, PlayerInformation in pairs(PlayerTable) do
-        local r, g, b = GetClassColor(PlayerInformation.classId)
+        local r, g, b = GetClassColor(PlayerInformation.classID)
         local _, r2, g2, b2 = IncendioLoot:ColoredRollType(PlayerInformation.rollType)
 
         local cols = {
@@ -250,7 +250,7 @@ local function UpdateExternalAssignItem(prefix, str, distribution, sender)
     local PlayerTable = IncendioLootDataHandler.GetVoteData()[Index]
     local PlayerInformation = PlayerTable[NewPlayerName]
     local InstanceName, _, DifficultyIndex, DifficultyName, _, _, _, InstanceMapeID, _ = GetInstanceInfo()
-    IncendioLootLootDatabase.AddItemToDatabase(NewPlayerName,InstanceMapeID,PlayerInformation.class, InstanceName, PlayerInformation.rollType, ItemLink, PlayerInformation.vote, PlayerInformation.roll,DifficultyIndex,DifficultyName,PlayerInformation.classId)
+    IncendioLootLootDatabase.AddItemToDatabase(NewPlayerName,InstanceMapeID,PlayerInformation.class, InstanceName, PlayerInformation.rollType, ItemLink, PlayerInformation.vote, PlayerInformation.roll,DifficultyIndex,DifficultyName,PlayerInformation.classID)
     PlayerInformation.rollType = NewRollType
     IncendioLootLootCouncilGUI.CreateScrollFrame(Index)
 
@@ -288,7 +288,7 @@ function IncendioLootLootCouncil.PrepareAndAddItemToHistory(Index, PlayerName)
         if (value["Index"] == Index) then
             local PlayerInformation = PlayerTable[PlayerName]
             local InstanceName, _, DifficultyIndex, DifficultyName, _, _, _, InstanceMapeID, _ = GetInstanceInfo()
-            IncendioLootLootDatabase.AddItemToDatabase(PlayerName,InstanceMapeID,PlayerInformation.class, InstanceName, PlayerInformation.rollType, value["ItemLink"], PlayerInformation.vote, PlayerInformation.roll,DifficultyIndex,DifficultyName,PlayerInformation.classId)
+            IncendioLootLootDatabase.AddItemToDatabase(PlayerName,InstanceMapeID,PlayerInformation.class, InstanceName, PlayerInformation.rollType, value["ItemLink"], PlayerInformation.vote, PlayerInformation.roll,DifficultyIndex,DifficultyName,PlayerInformation.classID)
             PlayerInformation.rollType = "Zugewiesen"
             IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_ASSIGN_ITEM_COUNCIL, 
                         LootCouncil:Serialize({Index = Index, NewPlayerName = PlayerName, NewRollType = "Zugewiesen", ItemLink = value["ItemLink"]}), 
