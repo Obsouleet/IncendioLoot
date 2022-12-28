@@ -1,11 +1,21 @@
 local addonName, addon = ...
 local IncendioLoot = _G[addonName]
 local LootCouncil = IncendioLoot:NewModule("LootCouncil", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
+local L = addon.L
+
 local WaitForCouncilMembercount
 IncendioLootLootCouncil = {}
 
 local function CheckIfSenderIsPlayer(sender)
     return sender == UnitName("player")
+end
+
+local function round(n)
+    return math.floor(n+0.5)
+end
+
+local function roundTwoDecimals(n)
+    return math.floor(n * 100) / 100
 end
 
 local function CheckIfViableLootAvailable()
@@ -47,8 +57,11 @@ local function BuildVoteData()
         PlayerTable = VoteData[index]
         for member = 1, GetNumGroupMembers(), 1 do 
             local name, _, _, _, class, _, zone , online = GetRaidRosterInfo(member)
-            PlayerInformation = {class = class, zone = zone, online = online, rollType = IncendioLoot.STATICS.NO_VOTE, iLvl = " ", name = name, roll = math.random(1,100), vote = 0, autodecision = 0}
-            PlayerTable[name] = PlayerInformation
+            local _, ClassFilename = UnitClass(name)
+            local _, _, _, ClassColor = GetClassColor(ClassFilename)
+            local ColoredName = WrapTextInColorCode(name, ClassColor)
+            PlayerInformation = {class = class, zone = zone, online = online, rollType = L["NO_VOTE"], iLvl = " ", name = ColoredName, roll = math.random(1,100), vote = 0, autodecision = 0, note = " "}
+            PlayerTable[ColoredName] = PlayerInformation
         end
     end
     IncendioLootDataHandler.SetVoteData(VoteData)
@@ -89,7 +102,7 @@ local function BuildData()
         IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_LOOTDATA_BUILDED, 
             LootCouncil:Serialize(Payload), 
             IsInRaid() and "RAID" or "PARTY")
-        if WaitForCouncilMembercount <= 0 then
+        if WaitForCouncilMembercount == 0 then
             IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_LOOTED,
             LootCouncil:Serialize(IncendioLootDataHandler.GetLootTable()),
             IsInRaid() and "RAID" or "PARTY")
@@ -137,14 +150,14 @@ function IncendioLootLootCouncil.BuildScrollData(VoteData, ItemIndex)
     for index, PlayerInformation in pairs(PlayerTable) do
         local cols = {
             { ["value"] = PlayerInformation.name },
-            { ["value"] = PlayerInformation.class },
             { ["value"] = PlayerInformation.zone },
             { ["value"] = tostring(PlayerInformation.online) },
             { ["value"] = tostring(PlayerInformation.rollType) },
             { ["value"] = tostring(PlayerInformation.iLvl) },
             { ["value"] = tostring(PlayerInformation.roll) },
             { ["value"] = PlayerInformation.vote },
-            { ["value"] = PlayerInformation.autodecision }
+            { ["value"] = PlayerInformation.autodecision },
+            { ["value"] = PlayerInformation.note }
         }
         rows[i] = { ["cols"] = cols }
         i = i + 1
@@ -180,14 +193,46 @@ function IncendioLootLootCouncil.SetSessionInactive()
     end
 end
 
-local function UpdateVoteData(Index, PlayerName, RollType, Ilvl)
+local function UpdateVoteData(Index, PlayerName, RollType, Ilvl, Note)
     local PlayerTable = IncendioLootDataHandler.GetVoteData()[Index]
     local PlayerInformation = PlayerTable[PlayerName]
-    local NumOfItems = IncendioLootLootDatabase.ReturnItemsLastTwoWeeksPlayer(PlayerName, tostring(RollType)) * 10000
-    local AutoDecisionResult = (NumOfItems + Ilvl + PlayerInformation.roll) / 10000
-    PlayerInformation.autodecision = AutoDecisionResult
     PlayerInformation.rollType = tostring(RollType)
     PlayerInformation.iLvl = Ilvl
+    PlayerInformation.note = Note
+
+    if UnitIsGroupLeader("player") then 
+        local BasePlayerValue = 20000;
+        local NumOfItems = IncendioLootLootDatabase.ReturnItemsLastTwoWeeksPlayer(PlayerName, tostring(RollType)) * 1000
+        local AutoDecisionResult = roundTwoDecimals(((BasePlayerValue - NumOfItems - Ilvl + PlayerInformation.roll) / 10000) / 2 * 100)
+        PlayerInformation.autodecision = AutoDecisionResult
+
+        IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_DATA_AUTODECISION, 
+                                    LootCouncil:Serialize({AutoDecisionResult = AutoDecisionResult, Index = Index, PlayerName = PlayerName}), 
+        IsInRaid() and "RAID" or "PARTY")
+    end
+end
+
+local function UpdateAutodecision(Index, PlayerName, AutoDecisionResult)
+    local PlayerTable = IncendioLootDataHandler.GetVoteData()[Index]
+    local PlayerInformation = PlayerTable[PlayerName]
+    PlayerInformation.autodecision = AutoDecisionResult
+end
+
+local function HandleAutoDecision(prefix, str, distribution, sender)
+    if not IncendioLoot.ILOptions.profile.options.general.active then 
+        return
+    end
+    
+    if not IncendioLootDataHandler.GetSessionActive() or not IncendioLootFunctions.CheckIfMasterLooter() then 
+        return
+    end
+
+    local _, AutoDecision = LootCouncil:Deserialize(str)
+    local NewIndex = AutoDecision.Index
+    local AutoDecisionResult = AutoDecision.AutoDecisionResult
+    local PlayerName = AutoDecision.PlayerName
+    UpdateAutodecision(NewIndex, PlayerName, AutoDecisionResult)
+    IncendioLootLootCouncilGUI.CreateScrollFrame(NewIndex)
 end
 
 local function UpdateExternalAssignItem(prefix, str, distribution, sender)
@@ -200,8 +245,11 @@ local function UpdateExternalAssignItem(prefix, str, distribution, sender)
     local Index = CouncilAssign.Index
     local NewPlayerName = CouncilAssign.NewPlayerName
     local NewRollType = CouncilAssign.NewRollType
+    local ItemLink = CouncilAssign.ItemLink
     local PlayerTable = IncendioLootDataHandler.GetVoteData()[Index]
     local PlayerInformation = PlayerTable[NewPlayerName]
+    local InstanceName, _, DifficultyIndex, DifficultyName, _, _, _, InstanceMapeID, _ = GetInstanceInfo()
+    IncendioLootLootDatabase.AddItemToDatabase(NewPlayerName,InstanceMapeID,PlayerInformation.class, InstanceName, PlayerInformation.rollType, ItemLink, PlayerInformation.vote, PlayerInformation.roll,DifficultyIndex,DifficultyName)
     PlayerInformation.rollType = NewRollType
     IncendioLootLootCouncilGUI.CreateScrollFrame(Index)
 
@@ -236,13 +284,13 @@ function IncendioLootLootCouncil.PrepareAndAddItemToHistory(Index, PlayerName)
     local PlayerTable = IncendioLootDataHandler.GetVoteData()[Index]
     local LootTable = IncendioLootDataHandler.GetLootTable()
     for i, value in pairs(LootTable) do
-        if (value["Index"] == Index) then 
+        if (value["Index"] == Index) then
             local PlayerInformation = PlayerTable[PlayerName]
             local InstanceName, _, DifficultyIndex, DifficultyName, _, _, _, InstanceMapeID, _ = GetInstanceInfo()
             IncendioLootLootDatabase.AddItemToDatabase(PlayerName,InstanceMapeID,PlayerInformation.class, InstanceName, PlayerInformation.rollType, value["ItemLink"], PlayerInformation.vote, PlayerInformation.roll,DifficultyIndex,DifficultyName)
             PlayerInformation.rollType = "Zugewiesen"
             IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_ASSIGN_ITEM_COUNCIL, 
-                        LootCouncil:Serialize({Index = Index, NewPlayerName = PlayerName, NewRollType = "Zugewiesen"}), 
+                        LootCouncil:Serialize({Index = Index, NewPlayerName = PlayerName, NewRollType = "Zugewiesen", ItemLink = value["ItemLink"]}), 
                         IsInRaid() and "RAID" or "PARTY")
             IncendioLootLootCouncilGUI.CreateScrollFrame(Index)
             IncendioLootLootCouncil.SetItemAssignedIcon(Index)
@@ -290,10 +338,6 @@ function IncendioLootLootCouncil.UpdateCouncilVoteData(Index, PlayerName, Newrol
     IncendioLootLootCouncilGUI.CreateScrollFrame(Index)
 end
 
-local function round(n)
-    return math.floor(n+0.5)
-end
-
 local function ReceiveDataAndCheck(prefix, str, distribution, sender)
     if not UnitIsGroupLeader("player") then
         return
@@ -332,7 +376,12 @@ local function HandleLootVotePlayerEvent(prefix, str, distribution, sender)
     local NewRollType = LootVote.rollType
     local NewIndex = LootVote.Index
     local ILvl = round(LootVote.iLvl)
-    UpdateVoteData(NewIndex,sender,NewRollType, ILvl)
+    local Note = LootVote.Note
+    local _, ClassFilename = UnitClass(sender)
+    local _, _, _, ClassColor = GetClassColor(ClassFilename)
+    local ColoredName = WrapTextInColorCode(sender, ClassColor)
+
+    UpdateVoteData(NewIndex, ColoredName, NewRollType, ILvl, Note)
     IncendioLootLootCouncilGUI.CreateScrollFrame(NewIndex)
 end
 
@@ -351,4 +400,6 @@ function LootCouncil:OnEnable()
                             UpdateExternalAssignItem)
     LootCouncil:RegisterComm(IncendioLoot.EVENTS.EVENT_DATA_RECEIVED,
                             ReceiveDataAndCheck)
+    LootCouncil:RegisterComm(IncendioLoot.EVENTS.EVENT_DATA_AUTODECISION,
+                            HandleAutoDecision)
 end

@@ -1,28 +1,36 @@
 local addonName, addon = ...
 local IncendioLoot = _G[addonName]
-local FrameOpen
 local LootVoting = IncendioLoot:NewModule("LootVoting", "AceConsole-3.0", "AceEvent-3.0", "AceSerializer-3.0")
 local LootVotingGUI = LibStub("AceGUI-3.0")
+local L = addon.L
+
+local FrameOpen
 local ChildCount = 0
-local rollStates = {
-    {type = "BIS", name = "BIS"},
-    {type = "UPGRADE", name = "Upgrade"},
-    {type = "SECOND", name = "Secondspeck"},
-    {type = "OTHER", name = "Anderes"},
-    {type = "TRANSMOG", name = "Transmog"},
-    {type = "PASS", name = "Passen"}
+
+local lootTypes = { "BIS", "UPGRADE", "SECOND", "OTHER", "TRANSMOG", "PASS" }
+local rollStates = {}
+local lootTypeColor = {
+    ["BIS"] = IncendioLoot.COLORS.GREEN,
+    ["UPGRADE"] = IncendioLoot.COLORS.ORANGE,
+    ["SECOND"] = IncendioLoot.COLORS.BLUE,
+    ["OTHER"] = IncendioLoot.COLORS.YELLOW,
+    ["TRANSMOG"] = IncendioLoot.COLORS.PURPLE,
+    ["PASS"] = IncendioLoot.COLORS.GREY
 }
+for _, type in ipairs(lootTypes) do
+    table.insert(rollStates, {type = type, name = WrapTextInColorCode(L["VOTE_STATE_"..type], lootTypeColor[type])})
+end
+
 local VotingMainFrameClose
-local VotingButtonFrameCLose
 local ViableLootAvailable
 IncendioLootLootVoting = {}
 
-local function CreateRollButton(ItemGroup, rollState, ItemLink, Index)
+local function CreateRollButton(ItemGroup, rollState, ItemLink, Index, NoteBox)
     local button = LootVotingGUI:Create("Button")
     button:SetText(rollState.name)
     button:SetCallback("OnClick", function() 
         local _, AverageItemLevel = GetAverageItemLevel()
-        LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ ItemLink = ItemLink, rollType = rollState.type, Index = Index, iLvl = AverageItemLevel }), IsInRaid() and "RAID" or "PARTY") 
+        LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ItemLink = ItemLink, rollType = WrapTextInColorCode(rollState.type, lootTypeColor[rollState.type]), Index = Index, iLvl = AverageItemLevel, Note = NoteBox:GetText()}), IsInRaid() and "RAID" or "PARTY") 
         ChildCount = ChildCount - 1
         if (ChildCount == 0) then 
             IncendioLootLootVoting.CloseGUI()
@@ -34,14 +42,25 @@ local function CreateRollButton(ItemGroup, rollState, ItemLink, Index)
     return button
 end
 
+local function CloseGUIManual()
+    if (VotingMainFrameClose == nil) then 
+        return
+    end
+    if not FrameOpen then
+        return
+    end
+    LootVotingGUI:Release(VotingMainFrameClose)
+    FrameOpen = false
+    ChildCount = 0
+end
+
 function IncendioLootLootVoting.CloseGUI()
     if (VotingMainFrameClose == nil) then 
         return
     end
     if VotingMainFrameClose:IsShown() then
-        LootVotingGUI:Release(VotingMainFrameClose)
-        LootVotingGUI:Release(VotingButtonFrameCLose)
         FrameOpen = false
+        LootVotingGUI:Release(VotingMainFrameClose)
     end
     ChildCount = 0
 end
@@ -57,7 +76,7 @@ local function AutoPass()
                 local ItemLink = Item.ItemLink
                 local Index = Item.Index
                 local _, AverageItemLevel = GetAverageItemLevel()
-                LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ ItemLink = ItemLink,  rollType = IncendioLoot.STATICS.DID_AUTO_PASS, Index = Index, iLvl = AverageItemLevel }), IsInRaid() and "RAID" or "PARTY")
+                LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ ItemLink = ItemLink,  rollType = L["DID_AUTO_PASS"], Index = Index, iLvl = AverageItemLevel }), IsInRaid() and "RAID" or "PARTY")
             else
                 ViableLootAvailable = true
             end
@@ -75,31 +94,17 @@ local function HandleLooted()
         return
     end
 
-    AutoPass()
-    if not ViableLootAvailable then 
-        return
+    if IncendioLoot.ILOptions.profile.options.general.addonAutopass then
+        AutoPass()
+        if not ViableLootAvailable then 
+            return
+        end
     end
 
-    local LootVotingMainFrame = LootVotingGUI:Create("Window")
-    LootVotingMainFrame:SetTitle("Incendio Loot - Wir brauchen Meersälze!")
+    local LootVotingMainFrame = LootVotingGUI:Create("Frame")
+    LootVotingMainFrame:SetTitle(L["VOTE_TITLE"])
     LootVotingMainFrame:EnableResize(false)
     VotingMainFrameClose = LootVotingMainFrame
-
-    local CloseButtonFrame = LootVotingGUI:Create("InlineGroup")
-    CloseButtonFrame:SetTitle("")
-    CloseButtonFrame:SetLayout("Fill")
-    VotingButtonFrameCLose = CloseButtonFrame
-
-    local CloseButton = LootVotingGUI:Create("Button")
-    CloseButton:SetText("Close")
-    CloseButton:SetCallback("OnClick", function ()
-        IncendioLootLootVoting.CloseGUI()
-    end)
-    CloseButtonFrame:AddChild(CloseButton)
-    CloseButtonFrame.frame:SetPoint("BOTTOMRIGHT",LootVotingMainFrame.frame,"BOTTOMRIGHT",0,-45)
-    CloseButtonFrame.frame:SetWidth(150)
-    CloseButtonFrame.frame:SetHeight(60)
-    CloseButtonFrame.frame:Show()
 
     for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
         if type(Item) == "table" then
@@ -108,12 +113,13 @@ local function HandleLooted()
             local ItemLink = Item.ItemLink
             local Index = Item.Index
 
-            if (IncendioLootDataHandler.GetViableLoot()[ItemName] ~= nil) then
+            if (IncendioLootDataHandler.GetViableLoot()[ItemName] ~= nil) or 
+            not IncendioLoot.ILOptions.profile.options.general.addonAutopass then
 
                 local ItemGroup = LootVotingGUI:Create("InlineGroup")
                 ItemGroup:SetLayout("Flow") 
                 ItemGroup:SetFullWidth(true)
-                ItemGroup:SetHeight(70)
+                ItemGroup:SetHeight(150)
                 LootVotingMainFrame:AddChild(ItemGroup)
 
                 local IconWidget1 = LootVotingGUI:Create("InteractiveLabel")
@@ -134,26 +140,33 @@ local function HandleLooted()
                     GameTooltip:Hide();
                 end)
                 ChildCount = ChildCount + 1
+                local NoteBox = LootVotingGUI:Create("EditBox")
+                NoteBox:SetLabel("Notiz")
+                NoteBox:SetMaxLetters(20)
                 for _, rollState in pairs(rollStates) do
-                    ItemGroup:AddChild(CreateRollButton(ItemGroup, rollState, ItemLink, Index, CloseButtonFrame))
+                    ItemGroup:AddChild(CreateRollButton(ItemGroup, rollState, ItemLink, Index, NoteBox))
                 end
+
+                ItemGroup:AddChild(NoteBox)
             end
         end
     end
+
+    print("BLUBL")
     LootVotingMainFrame:SetLayout("ILVooting")
-    LootVotingMainFrame.frame:Show()
+    LootVotingMainFrame:SetCallback("OnClose", CloseGUIManual)
     FrameOpen = true
 end
 
 LootVotingGUI:RegisterLayout("ILVooting", 
     function(content, children)
-        local VotingFrameHeight = 170
+        local VotingFrameHeight = 270
 
         FrameContent = content["obj"] 
         FrameObject = FrameContent["frame"]
         for i = 1, #children do
             if (i > 1) then
-                VotingFrameHeight = VotingFrameHeight + 140
+                VotingFrameHeight = VotingFrameHeight + 146
             end
         end
 
@@ -193,7 +206,7 @@ function LootVoting:OnEnable()
             return
         end
         HandleLooted()
-    end, "Zeigt das Loot-Vote-Fenster an.")
+    end, L["COMMAND_SHOW"])
 end
 
 LootVoting:RegisterEvent("LOOT_OPENED", function (eventname, rollID)

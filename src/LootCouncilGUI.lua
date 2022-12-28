@@ -2,11 +2,16 @@ local addonName, addon = ...
 local IncendioLoot = _G[addonName]
 local LootCouncilGUI = IncendioLoot:NewModule("LootCouncilGUI", "AceEvent-3.0", "AceSerializer-3.0", "AceConsole-3.0")
 local LootCouncilAceGUI = LibStub("AceGUI-3.0")
+local L = addon.L
+
 local MainFrameInit = false;
+local Collapsed = false;
 local CurrentIndex
 local MainFrameClose
 local ItemFrameClose
 local ButtonFrameCLose
+local MainFrameCollapsedClose
+local ButtonFrameCollapsedClose
 local ScrollingFrame 
 local ScrollingFrameSet
 local SelectedPlayerName
@@ -18,6 +23,35 @@ local function ResetMainFrameStatus()
     MainFrameInit = false;
 end
 
+local function CloseCollapsed()
+    if not Collapsed then 
+        return
+    end
+
+    LootCouncilAceGUI:Release(ButtonFrameCollapsedClose)
+    LootCouncilAceGUI:Release(MainFrameCollapsedClose)
+    Collapsed = false
+    IncendioLootLootCouncilGUI.HandleLootLootedEvent()
+end
+
+local function CloseGUIManual()
+    if (MainFrameClose == nil) then
+        return
+    end
+    if not MainFrameInit then 
+        return
+    end
+    if ScrollingFrameSet then
+        ScrollingFrame:Hide()
+        ScrollingFrameSet = false
+    end
+    LootCouncilAceGUI:Release(ButtonFrameCLose)
+    LootCouncilAceGUI:Release(ItemFrameClose)
+    LootCouncilAceGUI:Release(MainFrameClose)
+    ResetMainFrameStatus()
+    IconChilds = {}
+end
+
 function IncendioLootLootCouncilGUI.CloseGUI()
     if (MainFrameClose == nil) then
         return
@@ -27,18 +61,51 @@ function IncendioLootLootCouncilGUI.CloseGUI()
         ScrollingFrameSet = false
     end
     if MainFrameClose:IsShown() then
+        ResetMainFrameStatus()
         LootCouncilAceGUI:Release(ButtonFrameCLose)
         LootCouncilAceGUI:Release(ItemFrameClose)
         LootCouncilAceGUI:Release(MainFrameClose)
-        ResetMainFrameStatus()
     end
     IconChilds = {}
 end
 
+local function CollapseFrame()
+    if not Collapsed then
+        IncendioLootLootCouncilGUI.CloseGUI()
+        local LootCouncilMainFrame = LootCouncilAceGUI:Create("Window")
+        LootCouncilMainFrame:SetTitle("Incendio Lootcouncil")
+        LootCouncilMainFrame:SetStatusText("")
+        LootCouncilMainFrame:SetLayout("Fill")
+        LootCouncilMainFrame:EnableResize(false)
+        MainFrameCollapsedClose = LootCouncilMainFrame
+        LootCouncilMainFrame.frame:SetWidth(1000)
+        LootCouncilMainFrame.frame:SetHeight(50)
+
+        local CloseButtonFrame = LootCouncilAceGUI:Create("InlineGroup")
+        CloseButtonFrame:SetTitle("")
+        CloseButtonFrame:SetLayout("Flow")
+        ButtonFrameCollapsedClose = CloseButtonFrame
+
+        local CollapseExpandButton = LootCouncilAceGUI:Create("Button")
+        CollapseExpandButton:SetText("Collapse / Expand")
+        CollapseExpandButton:SetCallback("OnClick", function ()
+            CloseCollapsed()
+        end)
+        CloseButtonFrame:AddChild(CollapseExpandButton)
+        CloseButtonFrame.frame:SetPoint("BOTTOMRIGHT",LootCouncilMainFrame.frame,"BOTTOMRIGHT",0,-55)
+        CloseButtonFrame.frame:SetWidth(150)
+        CloseButtonFrame.frame:SetHeight(60)
+        CloseButtonFrame.frame:Show()
+
+        Collapsed = true
+    end
+end
+
+
 StaticPopupDialogs["IL_ENDSESSION"] = {
-    text = IncendioLoot.STATICS.END_SESSION,
-    button1 = "Yes",
-    button2 = "No",
+    text = L["END_SESSION"],
+    button1 = L["YES"],
+    button2 = L["NO"],
     OnAccept = function(self)
         IncendioLootLootCouncilGUI.CloseGUI()
         IncendioLootLootCouncil.SetSessionInactive()
@@ -49,7 +116,7 @@ StaticPopupDialogs["IL_ENDSESSION"] = {
 }
 
 StaticPopupDialogs["IL_ASSIGNITEM"] = {
-    text = IncendioLoot.STATICS.ASSIGN_ITEM,
+    text = L["ASSIGN_ITEM"],
     button1 = "Yes",
     button2 = "No",
     OnAccept = function(self, data, data2)
@@ -66,11 +133,11 @@ StaticPopupDialogs["IL_ASSIGNITEM"] = {
         for i, value in pairs(LootTable) do
             if (value["Index"] == data) then 
                 if value["Assigend"] == true then
-                    print(IncendioLoot.STATICS.ITEM_ALREADY_ASSIGNED)
+                    print(L["ITEM_ALREADY_ASSIGNED"])
                     return
                 else
                     value["Assigend"] = true
-                    SendChatMessage("Das Item "..value["ItemLink"].." wurde an "..data2.." vergeben.", "RAID")
+                    SendChatMessage(string.format(L["COUNCIL_ASSIGNED_ITEM"], value.ItemLink, data2), "RAID")
                 end
             end
         end
@@ -197,7 +264,7 @@ local function PositionFrames(LootCouncilMainFrame, ItemFrame, CloseButtonFrame,
     ItemFrame.frame:SetHeight(LootCouncilMainFrame.frame:GetHeight()- 50)
     ItemFrame.frame:Show()
 
-    CloseButtonFrame.frame:SetPoint("BOTTOMRIGHT",LootCouncilMainFrame.frame,"BOTTOMRIGHT",0,-45)
+    CloseButtonFrame.frame:SetPoint("BOTTOMRIGHT",LootCouncilMainFrame.frame,"BOTTOMRIGHT",0,-75)
     CloseButtonFrame.frame:SetWidth(150)
     CloseButtonFrame.frame:SetHeight(60)
     CloseButtonFrame.frame:Show()
@@ -205,7 +272,7 @@ end
 
 function IncendioLootLootCouncilGUI.HandleLootLootedEvent()
     if not (IncendioLootDataHandler.GetSessionActive()) or MainFrameInit then
-        print(IncendioLoot.STATICS.COUNCIL_FRAME_CHECK)
+        print(L["COUNCIL_FRAME_CHECK"])
         return
     end
 
@@ -225,22 +292,33 @@ function IncendioLootLootCouncilGUI.HandleLootLootedEvent()
 
     local CloseButtonFrame = LootCouncilAceGUI:Create("InlineGroup")
     CloseButtonFrame:SetTitle("")
-    CloseButtonFrame:SetLayout("Fill")
+    CloseButtonFrame:SetLayout("Flow")
     ButtonFrameCLose = CloseButtonFrame
 
     local CloseButton = LootCouncilAceGUI:Create("Button")
     CloseButton:SetText("Close")
     CloseButton:SetCallback("OnClick", function ()
-        StaticPopup_Show("IL_ENDSESSION")
+        if UnitIsGroupLeader("player") then
+            StaticPopup_Show("IL_ENDSESSION")
+        else
+            IncendioLootLootCouncilGUI.CloseGUI()
+        end
     end)
     CloseButtonFrame:AddChild(CloseButton)
+
+    local CollapseExpandButton = LootCouncilAceGUI:Create("Button")
+    CollapseExpandButton:SetText("Collapse / Expand")
+    CollapseExpandButton:SetCallback("OnClick", function ()
+        CollapseFrame()
+    end)
+    CloseButtonFrame:AddChild(CollapseExpandButton)
 
     CreateItemFrame(ItemFrame)
     PositionFrames(LootCouncilMainFrame, ItemFrame, CloseButtonFrame)
 
     LootCouncilMainFrame.frame:SetWidth(1000)
 
-    LootCouncilMainFrame:SetCallback("OnClose", ResetMainFrameStatus)
+    LootCouncilMainFrame:SetCallback("OnClose", CloseGUIManual)
 end
 
 function LootCouncilGUI:OnInitialize()
@@ -252,5 +330,5 @@ function LootCouncilGUI:OnInitialize()
 end
 
 function LootCouncilGUI:OnEnable()
-    IncendioLoot:RegisterSubCommand("council", IncendioLootLootCouncilGUI.HandleLootLootedEvent, "Zeigt das Council-Fenster an.")
+    IncendioLoot:RegisterSubCommand("council", IncendioLootLootCouncilGUI.HandleLootLootedEvent, L["COMMAND_COUNCIL"])
 end

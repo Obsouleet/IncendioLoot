@@ -8,6 +8,7 @@ IncendioLootFunctions = {}
 
 local ReceivedOutOfDateMessage = false
 local AceConsole = LibStub("AceConsole-3.0")
+local L = addon.L
 
 --[[
     ["subcommand"] = {
@@ -30,34 +31,17 @@ IncendioLoot.EVENTS = {
     EVENT_LOOT_ANNOUNCE_MLS = "IL.AnnounceMLs", -- Announces Masterlooters to all addonusers
     EVENT_LOOT_VOTE_COUNCIL = "IL.AnnounceVote", -- Announces the own vote to Council
     EVENT_LOOT_ASSIGN_ITEM_COUNCIL = "IL.AssignItem",
-    EVENT_DATA_RECEIVED = "IL.DataReceived"
-}
-
---[[
-    Static Text Constants
-]] --
-IncendioLoot.STATICS = {
-    NO_VOTE = "Kein Vote",
-    ASSIGN_ITEM = "Möchtest du das Item zuweisen",
-    END_SESSION = "Möchtest du die Sitzung beenden?",
-    WIPE_DATABASE = "Möchtest du WIRKLICH die Lootdatenbank löschen?",
-    DATABASE_WIPED = "Die Lootdatenbank wurde gelöscht.",
-    DOUBLE_USE_WARNING = "WARNUNG, ein weiteres LootAddon ist aktiv! Dies kann zu Problemen führen.",
-    OUT_OF_DATE_ADDON = "Achtung, deine Version von IncendioLoot ist nicht aktuell. Aktuelle Version: ",
-    SELECT_PLAYER_FIRST = "Bitte erst einen Spieler auswählen!",
-    ITEM_ALREADY_ASSIGNED = "Das Item wurde bereits zugewiesen.",
-    DO_AUTOPASS = "Möchtest du automatisch auf Loot passen, der durch das Standardinterface angeboten wird?",
-    COUNCIL_FRAME_CHECK = "Das Council-Fenster ist bereits geöffnet oder es ist keine Session aktiv.",
-    DID_AUTO_PASS = "Automatisch gepasst"
+    EVENT_DATA_RECEIVED = "IL.DataReceived",
+    EVENT_DATA_AUTODECISION = "IL.AutoDecision"
 }
 
 --[[
     local Dialogs
 ]]
 StaticPopupDialogs["IL_DOAUTOPASS"] = {
-    text = IncendioLoot.STATICS.DO_AUTOPASS,
-    button1 = "Ja",
-    button2 = "Nein",
+    text = L["DO_AUTOPASS"],
+    button1 = L["YES"],
+    button2 = L["NO"],
     OnAccept = function(self)
         IncendioLoot.ILOptions.profile.options.general.autopass = true
     end,
@@ -73,7 +57,13 @@ StaticPopupDialogs["IL_DOAUTOPASS"] = {
     UwU pretty colors
 ]]
 IncendioLoot.COLORS = {
-    LIGHTBLUE = 'FF00CCFF'
+    LIGHTBLUE = 'FF00CCFF',
+    GREEN = 'FF03E83D',
+    ORANGE = 'FFED8505',
+    BLUE = 'FF046DFF',
+    YELLOW = 'FFE1F40D',
+    PURPLE = 'FFA301F9',
+    GREY = 'FF898989'
 }
 
 local C = IncendioLoot.COLORS
@@ -82,13 +72,13 @@ function IncendioLootFunctions.CheckIfMasterLooter()
     if UnitIsGroupLeader("player") then 
         return(true)
     end
+    
     local MasterLooter = IncendioLootDataHandler.GetExternalMasterLooter()
     
     for i, MasterLooter in pairs(MasterLooter) do
         if (UnitName("player") == MasterLooter) then
             return(true)
         end
-        
     end
 end
 
@@ -98,14 +88,18 @@ local function HandleVersionCheckEvent(prefix, str, distribution, sender)
     end
     local ver, msg = tonumber(IncendioLoot.Version), tonumber(str)
     if (msg and ver < msg and not ReceivedOutOfDateMessage) then
-        AceConsole:Print(IncendioLoot.STATICS.OUT_OF_DATE_ADDON..str)
+        AceConsole:Print(L["OUT_OF_DATE_ADDON"]..str)
         ReceivedOutOfDateMessage = true
     end
 end
 
 local function HandleGroupRosterUpdate()
-    IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_VERSION_CHECK,
-                                IncendioLoot.Version, IsInRaid() and "RAID" or "PARTY")
+    local _, _, _, _, _, _, _, _, _, LfgDungeonID = GetInstanceInfo()
+	if LfgDungeonID == nil then 
+        IncendioLoot:SendCommMessage(IncendioLoot.EVENTS.EVENT_VERSION_CHECK,
+                                    IncendioLoot.Version, IsInRaid() and "RAID" or "PARTY")
+	end
+
 end
 
 function IncendioLoot:RegisterSubCommand(subcommand, callback, description)
@@ -115,7 +109,7 @@ function IncendioLoot:RegisterSubCommand(subcommand, callback, description)
             description = description
         }
     else
-        AceConsole:Print("Chat command "..subcommand.." was already registered, therefore it's being ignored. Callstack is "..debugstack())
+        AceConsole:Print(string.format(L["ERROR_COMMAND_ALREADY_REGISTERED"], subommand, debugstack()))
     end
 end
 
@@ -123,20 +117,31 @@ local function PrintChatCommands()
     AceConsole:Print(WrapTextInColorCode("/il", C.LIGHTBLUE).." - IncendioLoot [v"..WrapTextInColorCode(IncendioLoot.Version, C.LIGHTBLUE).."]")
     for command, tbl in pairs(CommandCallbacks) do
         AceConsole:Print("  "..WrapTextInColorCode(command, C.LIGHTBLUE).." - "..tbl.description)
-    end
+    end 
 end
 
 
 
-local function CreateScrollCol(ColName, Width, sort)
-    if sort then
+local function CreateScrollCol(ColName, Width, sort, SortNext)
+    if sort and (SortNext == 0) then
         return {
             ["name"] = ColName,
             ["width"] = Width,
             ["align"] = "LEFT",
             ["colorargs"] = nil,
-            ["defaultsort"] = "dsc",
-            ["sortnext"]= 4,
+            ["defaultsort"] = "dcs",
+            ["DoCellUpdate"] = nil,
+        }
+    end
+    print(SortNext)
+    if sort and (SortNext > 0) then
+        return {
+            ["name"] = ColName,
+            ["width"] = Width,
+            ["align"] = "LEFT",
+            ["colorargs"] = nil,
+            ["defaultsort"] = "acs",
+            ["sortnext"]= SortNext,
             ["DoCellUpdate"] = nil,
         }
     end
@@ -146,9 +151,8 @@ local function CreateScrollCol(ColName, Width, sort)
         ["align"] = "LEFT",
         ["colorargs"] = nil,
         ["defaultsort"] = "dsc",
-        ["sortnext"]= 4,
         ["comparesort"] = function (cella, cellb, column)
-            --maybe build own search function?
+            --function?
         end,
         ["DoCellUpdate"] = nil,
     }
@@ -156,29 +160,29 @@ end
 
 local function BuildBasicData()
     local ScrollCols = {}
-    table.insert(ScrollCols, CreateScrollCol("Name", 80, true))
-    table.insert(ScrollCols, CreateScrollCol("Class", 80, true))
-    table.insert(ScrollCols, CreateScrollCol("Zone", 80))
-    table.insert(ScrollCols, CreateScrollCol("Online", 80))
-    table.insert(ScrollCols, CreateScrollCol("Answer", 80, true))
-    table.insert(ScrollCols, CreateScrollCol("Itemlevel", 80))
-    table.insert(ScrollCols, CreateScrollCol("Roll", 80, true))
-    table.insert(ScrollCols, CreateScrollCol("Votes", 80))
-    table.insert(ScrollCols, CreateScrollCol("Gewichtung", 80, true))
+    table.insert(ScrollCols, CreateScrollCol("Name", 80, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Zone", 80, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Online", 80, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Answer", 80, true, 8))
+    table.insert(ScrollCols, CreateScrollCol("Itemlevel", 80, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Roll", 80, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Votes", 80, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Gewichtung %", 80, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Notiz", 80, false, 0))
 
     return(ScrollCols)
 end
 
 local function BuildBasicHistoryData()
     local ScrollCols = {}
-    table.insert(ScrollCols, CreateScrollCol("Name", 80, true))
-    table.insert(ScrollCols, CreateScrollCol("Klasse", 100, true))
-    table.insert(ScrollCols, CreateScrollCol("Antwort", 80))
-    table.insert(ScrollCols, CreateScrollCol("Roll", 50))
-    table.insert(ScrollCols, CreateScrollCol("Item", 120, true))
-    table.insert(ScrollCols, CreateScrollCol("Instanz", 100))
-    table.insert(ScrollCols, CreateScrollCol("Datum", 100, true))
-    table.insert(ScrollCols, CreateScrollCol("Uhrzeit", 100, true))
+    table.insert(ScrollCols, CreateScrollCol("Name", 80, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Klasse", 100, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Antwort", 80, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Roll", 50, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Item", 120, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Instanz", 100, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Datum", 100, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Uhrzeit", 100, true, 0))
 
     return(ScrollCols)
 end
@@ -221,7 +225,7 @@ local function SetUpCommandHandler()
         end
     end)
 
-    IncendioLoot:RegisterSubCommand("help", PrintChatCommands, "Zeigt diese Befehls-Liste an.")
+    IncendioLoot:RegisterSubCommand("help", PrintChatCommands, L["COMMAND_HELP"])
 end
 
 local function EnterRaidInstance()
@@ -250,7 +254,7 @@ end
 local function CheckOtherLootAddons()
     local _,_,_,Enabled = GetAddOnInfo("RCLootCouncil")
     if Enabled then 
-        print(WrapTextInColorCode(IncendioLoot.STATICS.DOUBLE_USE_WARNING, "FFFF0000"))
+        print(WrapTextInColorCode(L["DOUBLE_USE_WARNING"], "FFFF0000"))
     end
 end
 
@@ -262,12 +266,15 @@ function IncendioLoot:OnInitialize()
                     active = false,
                     debug = false,
                     autopass = false,
-                    askForAutopass = true
+                    askForAutopass = true,
+                    addonAutopass = false
                 },
                 masterlooters = {
                     ml1 = "",
                     ml2 = "",
-                    ml3 = ""
+                    ml3 = "",
+                    ml4 = "",
+                    ml5 = ""
                 }
             }
         }
