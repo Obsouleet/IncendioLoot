@@ -9,16 +9,8 @@ local ChildCount = 0
 
 local lootTypes = { "BIS", "UPGRADE", "SECOND", "OTHER", "TRANSMOG", "PASS" }
 local rollStates = {}
-local lootTypeColor = {
-    ["BIS"] = IncendioLoot.COLORS.GREEN,
-    ["UPGRADE"] = IncendioLoot.COLORS.ORANGE,
-    ["SECOND"] = IncendioLoot.COLORS.BLUE,
-    ["OTHER"] = IncendioLoot.COLORS.YELLOW,
-    ["TRANSMOG"] = IncendioLoot.COLORS.PURPLE,
-    ["PASS"] = IncendioLoot.COLORS.GREY
-}
 for _, type in ipairs(lootTypes) do
-    table.insert(rollStates, {type = type, name = WrapTextInColorCode(L["VOTE_STATE_"..type], lootTypeColor[type])})
+    table.insert(rollStates, {type = type, name = L["VOTE_STATE_"..type]})
 end
 
 local VotingMainFrameClose
@@ -30,7 +22,7 @@ local function CreateRollButton(ItemGroup, rollState, ItemLink, Index, NoteBox)
     button:SetText(rollState.name)
     button:SetCallback("OnClick", function() 
         local _, AverageItemLevel = GetAverageItemLevel()
-        LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ItemLink = ItemLink, rollType = WrapTextInColorCode(rollState.type, lootTypeColor[rollState.type]), Index = Index, iLvl = AverageItemLevel, Note = NoteBox:GetText()}), IsInRaid() and "RAID" or "PARTY") 
+        LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ItemLink = ItemLink, rollType = rollState.type, Index = Index, iLvl = AverageItemLevel, Note = NoteBox:GetText()}), IsInRaid() and "RAID" or "PARTY") 
         ChildCount = ChildCount - 1
         if (ChildCount == 0) then 
             IncendioLootLootVoting.CloseGUI()

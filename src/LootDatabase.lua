@@ -3,7 +3,7 @@ local IncendioLoot = _G[addonName]
 local LootDatabase = IncendioLoot:NewModule("LootDatabase", "AceEvent-3.0", "AceSerializer-3.0", "AceConsole-3.0")
 IncendioLootLootDatabase = {}
 
-function IncendioLootLootDatabase.AddItemToDatabase(PlayerName, MapID, Class, Instance, RollType, ItemLink, Votes, Roll, DifficultyIndex, DifficultyName)
+function IncendioLootLootDatabase.AddItemToDatabase(PlayerName, MapID, Class, Instance, RollType, ItemLink, Votes, Roll, DifficultyIndex, DifficultyName, ClassId)
     if IncendioLoot.ILHistory.factionrealm.history[PlayerName] == nil then
         IncendioLoot.ILHistory.factionrealm.history[PlayerName] = {}
     end
@@ -11,6 +11,7 @@ function IncendioLootLootDatabase.AddItemToDatabase(PlayerName, MapID, Class, In
         PlayerName = PlayerName,
         MapID = MapID,
         Class = Class, 
+        ClassId = ClassId,
         Instance = Instance, 
         RollType = RollType, 
         ItemLink = ItemLink, 

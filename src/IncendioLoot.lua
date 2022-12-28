@@ -120,6 +120,19 @@ local function PrintChatCommands()
     end 
 end
 
+local lootTypeColor = {
+    ["BIS"] = IncendioLoot.COLORS.GREEN,
+    ["UPGRADE"] = IncendioLoot.COLORS.ORANGE,
+    ["SECOND"] = IncendioLoot.COLORS.BLUE,
+    ["OTHER"] = IncendioLoot.COLORS.YELLOW,
+    ["TRANSMOG"] = IncendioLoot.COLORS.PURPLE,
+    ["PASS"] = IncendioLoot.COLORS.GREY
+}
+
+function IncendioLoot:ColoredRollType(rollType)
+    return WrapTextInColorCode(rollType, lootTypeColor[rollType])
+end
+
 
 
 local function CreateScrollCol(ColName, Width, sort, SortNext)

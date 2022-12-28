@@ -13,10 +13,12 @@ local function GetDataRows()
     local rows = {}
     for _, Players in pairs(IncendioLoot.ILHistory.factionrealm.history) do
         for _, Content in ipairs(Players) do
+            local _, _, _, ClassColor = GetClassColor(Content.ClassId)
+
             local cols = {
-                { ["value"] = Content.PlayerName },
-                { ["value"] = Content.Class },
-                { ["value"] = Content.RollType },
+                { ["value"] = WrapTextInColorCode(Content.PlayerName, ClassColor)},
+                { ["value"] = Content.ClassId },
+                { ["value"] = IncendioLoot:ColoredRollType(Content.RollType) },
                 { ["value"] = Content.ItemLink },
                 { ["value"] = Content.Instance },
                 { ["value"] = Content.Date },
