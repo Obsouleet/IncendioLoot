@@ -17,7 +17,7 @@ local function GetDataRows()
 
             local cols = {
                 { ["value"] = WrapTextInColorCode(Content.PlayerName, ClassColor)},
-                { ["value"] = Content.ClassId },
+                { ["value"] = Content.Class },
                 { ["value"] = IncendioLoot:ColoredRollType(Content.RollType) },
                 { ["value"] = Content.ItemLink },
                 { ["value"] = Content.Instance },
