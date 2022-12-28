@@ -33,7 +33,7 @@ function IncendioLootLootDatabase.ReturnItemsLastTwoWeeksPlayer(PlayerName, Roll
     for _, entry in pairs(table) do
         if entry.PlayerName == PlayerName and entry.RollType == RollType then
             local currentDate = time(date("!*t"))
-            local diffInDays = (difftime(currentDate, entry.UnixTimeStamp) / 86400)
+            local diffInDays = (difftime(currentDate, tonumber(entry.UnixTimeStamp)) / 86400)
             if diffInDays < 15 then
                 count = count + 1
             end
@@ -43,6 +43,5 @@ function IncendioLootLootDatabase.ReturnItemsLastTwoWeeksPlayer(PlayerName, Roll
     if IncendioLoot.ILOptions.profile.options.general.debug then
         print(count)
     end
-
     return count
 end

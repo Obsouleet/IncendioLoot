@@ -137,7 +137,7 @@ StaticPopupDialogs["IL_ASSIGNITEM"] = {
                     return
                 else
                     value["Assigend"] = true
-                    SendChatMessage(string.format(L["COUNCIL_ASSIGNED_ITEM"], value.ItemLink, data2), "RAID")
+                    SendChatMessage("Item:" .. value.ItemLink.. "wurde vergeben", "RAID")
                 end
             end
         end

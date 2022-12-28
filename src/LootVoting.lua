@@ -104,6 +104,7 @@ local function HandleLooted()
     local LootVotingMainFrame = LootVotingGUI:Create("Frame")
     LootVotingMainFrame:SetTitle(L["VOTE_TITLE"])
     LootVotingMainFrame:EnableResize(false)
+    LootVotingMainFrame:SetWidth(750)
     VotingMainFrameClose = LootVotingMainFrame
 
     for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
@@ -152,7 +153,6 @@ local function HandleLooted()
         end
     end
 
-    print("BLUBL")
     LootVotingMainFrame:SetLayout("ILVooting")
     LootVotingMainFrame:SetCallback("OnClose", CloseGUIManual)
     FrameOpen = true
