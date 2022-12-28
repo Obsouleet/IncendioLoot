@@ -126,7 +126,8 @@ local lootTypeColor = {
     ["SECOND"] = IncendioLoot.COLORS.BLUE,
     ["OTHER"] = IncendioLoot.COLORS.YELLOW,
     ["TRANSMOG"] = IncendioLoot.COLORS.PURPLE,
-    ["PASS"] = IncendioLoot.COLORS.GREY
+    ["PASS"] = IncendioLoot.COLORS.GREY,
+    ["NO_VOTE"] = IncendioLoot.COLORS.GREY
 }
 
 local function aRGBHexToaRGB(hex)
