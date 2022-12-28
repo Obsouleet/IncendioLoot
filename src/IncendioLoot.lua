@@ -133,7 +133,6 @@ local function CreateScrollCol(ColName, Width, sort, SortNext)
             ["DoCellUpdate"] = nil,
         }
     end
-    print(SortNext)
     if sort and (SortNext > 0) then
         return {
             ["name"] = ColName,
