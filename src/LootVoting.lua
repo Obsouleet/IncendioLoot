@@ -33,9 +33,20 @@ local function CreateRollButton(ItemGroup, rollState, ItemLink, Index, NoteBox)
         LootVoting:SendCommMessage(IncendioLoot.EVENTS.EVENT_LOOT_VOTE_PLAYER, LootVoting:Serialize({ItemLink = ItemLink, rollType = WrapTextInColorCode(rollState.type, lootTypeColor[rollState.type]), Index = Index, iLvl = AverageItemLevel, Note = NoteBox:GetText()}), IsInRaid() and "RAID" or "PARTY") 
         ChildCount = ChildCount - 1
         if (ChildCount == 0) then 
-            IncendioLootLootVoting.CloseGUI()
+            for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
+                if (Item.Index == Index) then 
+                    Item.Rolled = true
+                    IncendioLootLootVoting.CloseGUI()
+                end
+            end
         else
-            ItemGroup.frame:Hide()
+            for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
+                if (Item.Index == Index) then 
+                    Item.Rolled = true
+                    IncendioLootLootVoting.CloseGUI()
+                    LootVoting.ReOpenGUI()
+                end
+            end
         end
     end)
     button:SetWidth(92)
@@ -104,11 +115,10 @@ local function HandleLooted()
     local LootVotingMainFrame = LootVotingGUI:Create("Frame")
     LootVotingMainFrame:SetTitle(L["VOTE_TITLE"])
     LootVotingMainFrame:EnableResize(false)
-    LootVotingMainFrame:SetWidth(750)
     VotingMainFrameClose = LootVotingMainFrame
 
     for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
-        if type(Item) == "table" then
+        if (type(Item) == "table") and (not Item.Rolled or Item.Rolled == nil) then
             local TexturePath = Item.TexturePath
             local ItemName = Item.ItemName
             local ItemLink = Item.ItemLink
@@ -119,12 +129,13 @@ local function HandleLooted()
 
                 local ItemGroup = LootVotingGUI:Create("InlineGroup")
                 ItemGroup:SetLayout("Flow") 
-                ItemGroup:SetFullWidth(true)
-                ItemGroup:SetHeight(150)
+                ItemGroup:SetHeight(100)
+                ItemGroup:SetWidth(60 + (#rollStates * 92) + 200 ) --Basewidth + rollstatesAmount * fixedwidth + Notebox
+                ItemGroup:SetAutoAdjustHeight(false)
                 LootVotingMainFrame:AddChild(ItemGroup)
 
                 local IconWidget1 = LootVotingGUI:Create("InteractiveLabel")
-                IconWidget1:SetWidth(100)
+                IconWidget1:SetWidth(60)
                 IconWidget1:SetHeight(40)
                 IconWidget1:SetImageSize(40,40)
                 IconWidget1:SetImage(TexturePath)
@@ -144,6 +155,7 @@ local function HandleLooted()
                 local NoteBox = LootVotingGUI:Create("EditBox")
                 NoteBox:SetLabel("Notiz")
                 NoteBox:SetMaxLetters(20)
+                NoteBox:SetWidth(150)
                 for _, rollState in pairs(rollStates) do
                     ItemGroup:AddChild(CreateRollButton(ItemGroup, rollState, ItemLink, Index, NoteBox))
                 end
@@ -158,19 +170,32 @@ local function HandleLooted()
     FrameOpen = true
 end
 
+function LootVoting.ReOpenGUI()
+    HandleLooted()
+end
+
 LootVotingGUI:RegisterLayout("ILVooting", 
     function(content, children)
-        local VotingFrameHeight = 270
+        local VotingFrameHeight = 165
 
         FrameContent = content["obj"] 
         FrameObject = FrameContent["frame"]
         for i = 1, #children do
             if (i > 1) then
-                VotingFrameHeight = VotingFrameHeight + 146
+                VotingFrameHeight = VotingFrameHeight + 90
             end
         end
 
+        local y = 0
+        for i, child in ipairs(children) do
+            child:SetPoint("TOPLEFT", 0, -y)
+            y = y + 86 + 2 
+        end
+
         FrameObject:SetHeight(VotingFrameHeight)
+        FrameObject:SetWidth(830)
+        FrameObject:SetBackdropColor(0,0,0,0)
+        FrameObject:SetBackdropBorderColor(0,0,0,0)
     end
 )
 
@@ -204,6 +229,9 @@ function LootVoting:OnEnable()
     IncendioLoot:RegisterSubCommand("show", function ()
         if not IncendioLootDataHandler.GetSessionActive() or FrameOpen then
             return
+        end
+        for key, Item in pairs(IncendioLootDataHandler.GetLootTable()) do
+            Item.Rolled = false
         end
         HandleLooted()
     end, L["COMMAND_SHOW"])
