@@ -32,7 +32,8 @@ IncendioLoot.EVENTS = {
     EVENT_LOOT_VOTE_COUNCIL = "IL.AnnounceVote", -- Announces the own vote to Council
     EVENT_LOOT_ASSIGN_ITEM_COUNCIL = "IL.AssignItem",
     EVENT_DATA_RECEIVED = "IL.DataReceived",
-    EVENT_DATA_AUTODECISION = "IL.AutoDecision"
+    EVENT_DATA_AUTODECISION = "IL.AutoDecision",
+    EVENT_CHAT_SENT = "IL.ChatSent"
 }
 
 --[[
@@ -178,12 +179,14 @@ local function BuildBasicData()
     local ScrollCols = {}
     table.insert(ScrollCols, CreateScrollCol("Name", 80, true, 0))
     table.insert(ScrollCols, CreateScrollCol("Zone", 80, false, 0))
-    table.insert(ScrollCols, CreateScrollCol("Online", 80, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Online", 50, false, 0))
     table.insert(ScrollCols, CreateScrollCol("Answer", 80, true, 8))
-    table.insert(ScrollCols, CreateScrollCol("Itemlevel", 80, false, 0))
-    table.insert(ScrollCols, CreateScrollCol("Roll", 80, true, 0))
-    table.insert(ScrollCols, CreateScrollCol("Votes", 80, false, 0))
-    table.insert(ScrollCols, CreateScrollCol("Gewichtung %", 80, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Itemlevel", 50, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Slot 1", 50, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Slot 2", 50, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Roll", 50, true, 0))
+    table.insert(ScrollCols, CreateScrollCol("Votes", 70, false, 0))
+    table.insert(ScrollCols, CreateScrollCol("Gewichtung %", 70, true, 0))
     table.insert(ScrollCols, CreateScrollCol("Notiz", 80, false, 0))
 
     return(ScrollCols)
@@ -208,6 +211,7 @@ local function SetSessionInactive()
     IncendioLootLootVoting.CloseGUI()
     IncendioLootLootCouncilGUI.CloseGUI()
     IncendioLootDataHandler.WipeData()
+    IncendioLootChatFrames.WipdeData()
     print("The Session has been closed")
 end
 

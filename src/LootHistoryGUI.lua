@@ -6,8 +6,6 @@ local HistoryTable
 local HistoryOpen
 local LastPosition = {point = "CENTER", relativeTo = UIParent, relativeToPoint = "CENTER", x = 0, y = 0}
 
-
-
 local function GetDataRows()
     local i = 1
     local rows = {}

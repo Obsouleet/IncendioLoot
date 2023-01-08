@@ -16,6 +16,7 @@ local ScrollingFrame
 local ScrollingFrameSet
 local SelectedPlayerName
 local IconChilds = {}
+local ChatFrame
 
 IncendioLootLootCouncilGUI = {}
 
@@ -48,6 +49,8 @@ local function CloseGUIManual()
     LootCouncilAceGUI:Release(ButtonFrameCLose)
     LootCouncilAceGUI:Release(ItemFrameClose)
     LootCouncilAceGUI:Release(MainFrameClose)
+    
+    IncendioLootChatFrames.WipdeData()
     ResetMainFrameStatus()
     IconChilds = {}
 end
@@ -65,6 +68,7 @@ function IncendioLootLootCouncilGUI.CloseGUI()
         LootCouncilAceGUI:Release(ButtonFrameCLose)
         LootCouncilAceGUI:Release(ItemFrameClose)
         LootCouncilAceGUI:Release(MainFrameClose)
+        IncendioLootChatFrames.WipdeData()
     end
     IconChilds = {}
 end
@@ -96,6 +100,8 @@ local function CollapseFrame()
         CloseButtonFrame.frame:SetWidth(150)
         CloseButtonFrame.frame:SetHeight(60)
         CloseButtonFrame.frame:Show()
+
+        ChatFrame.frame:Hide()
 
         Collapsed = true
     end
@@ -210,7 +216,41 @@ function IncendioLootLootCouncilGUI.CreateScrollFrame(index)
             ScrollFrameMenu(button)
         end,
     });
+
+    ScrollingFrame:RegisterEvents({
+        ["OnEnter"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, scrollingTable, button)
+            if realrow == nil then 
+                return
+            end
+            if (column == 6) or (column == 7) then --6,7 = Item1 and Item2
+                
+                local celldata = data[realrow].cols[column]
+                if celldata["value"] then
+                    GameTooltip:SetOwner(ScrollingFrame.frame, "ANCHOR_RIGHT")
+                    GameTooltip:ClearLines()
+                    GameTooltip:SetHyperlink(celldata["value"])
+                    GameTooltip:Show()
+                end
+            end
+        end,
+    });
+
+    ScrollingFrame:RegisterEvents({
+        ["OnLeave"] = function (rowFrame, cellFrame, data, cols, row, realrow, column, scrollingTable, button)
+            if (column == 6) or (column == 7) then --6,7 = Item1 and Item2
+                GameTooltip:Hide();
+            end
+        end,
+    });
 end
+
+local function CreateChatFrame(Index)
+    ChatFrame = IncendioLootChatFrames.CreateChatFrame(Index)
+    ChatFrame.frame:SetParent(MainFrameClose.frame)
+    ChatFrame.frame:SetPoint("CENTER",MainFrameClose.frame,"CENTER",378,-30)
+    IncendioLootChatFrames.AddChatMessage(Index)
+end
+
 
 local function CreateItemFrame(ItemFrame)
     local isFirst = true
@@ -244,13 +284,22 @@ local function CreateItemFrame(ItemFrame)
                         end
                     end
                     IconWidget1:SetImage(Item.TexturePath)
+
+                    local CreateFrame = false
+                    if CurrentIndex ~= Item.Index then
+                        CreateFrame = true
+                    end
                     CurrentIndex = Item.Index
                     IncendioLootLootCouncilGUI.CreateScrollFrame(Item.Index)
+                    if CreateFrame then
+                        CreateChatFrame(Item.Index)
+                    end
                 end);
                 if isFirst then
                     CurrentIndex = Item.Index
                     IncendioLootLootCouncilGUI.CreateScrollFrame(Item.Index)
                     IconWidget1:SetImage(Item.TexturePath)
+                    CreateChatFrame(Item.Index)
                     isFirst = false
                 end
             end

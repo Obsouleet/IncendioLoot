@@ -1,7 +1,7 @@
 ## Interface: 10002
 ## Titel: Incendio Loot
 ## Notes: Lootaddon for EU Antonidas Incendio Guild
-## Version: 0.7.7
+## Version: 0.8.0
 ## SavedVariables: IncendioLootHistoryDB, IncendioLootOptionsDB
 ## OptionalDeps: LibStub, CallbackHandler-1.0, Ace3, lib-st, LibSharedMedia-3.0
 
@@ -17,3 +17,4 @@ src/LootCouncilGUI.lua
 src/OptionsPane.lua
 src/LootDatabase.lua
 src/LootHistoryGUI.lua
+src/LootChatFrame.lua
