@@ -14,6 +14,13 @@ local OwnVoteData = {}
 local SelfViableLoot = {}
 IncendioLootDataHandler = {}
 
+--Init RaidIDs [[
+local RaidIDs = {
+    [34] = true, --The Stockade (this is my Testdungeon...)
+    [2522] = true --Vault of the Incarnates 
+}
+--]]
+
 function IncendioLootDataHandler.SetViableLoot(NewViableLoot)
     SelfViableLoot = NewViableLoot;
 end
@@ -118,6 +125,10 @@ end
 
 function IncendioLootDataHandler.SetExternalMLs(NewExternalMLs)
     ExternalMasterLooters = NewExternalMLs
+end
+
+function IncendioLootDataHandler.GetRaidIDs()
+    return RaidIDs 
 end
 
 function IncendioLootDataHandler.WipeData()

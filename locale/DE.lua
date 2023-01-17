@@ -4,6 +4,7 @@ local L = addon.L
 if GetLocale() == "deDE" then
     L["YES"] = "Ja"
     L["NO"] = "Nein"
+    L["HISTORY_NOT_AVAILABLE"] = "Es ist keine Historie vorhanden"
 
     L["NO_VOTE"] = "?"
     L["ASSIGN_ITEM"] = "Möchtest du das Item zuweisen"
@@ -29,7 +30,7 @@ if GetLocale() == "deDE" then
     L["VOTE_STATE_PASS"] = "Passen"
 
     -- Loot council
-    L["COUNCIL_ASSIGNED_ITEM"] = "Das Item %s wurde an %s vergeben."
+    L["COUNCIL_ASSIGNED_ITEM"] = "Das Item %s wurde an %s vergeben. %s"
         
     -- loot history
     L["HISTORY"] = "Loot-Historie"
@@ -37,6 +38,9 @@ if GetLocale() == "deDE" then
     L["HISTORY_FILTER_ITEM"] = "Gegenstand filtern:"
     L["HISTORY_FILTER_PLAYER"] = "Spieler filtern:"
 
+    --Loot database
+    L["SYNC_NOT_ACTIVATED"] = "Jemand hat versucht eine Datenbank zu synchronisieren. Doch die Funktkion ist nicht aktiv."
+    L["SYNC_SUCCESS"] = "%s wurde in die Datenbank synchronisiert"
 
     -- options
     L["OPTION_GENERAL"] = "Allgemein"
@@ -66,13 +70,26 @@ if GetLocale() == "deDE" then
     L["OPTION_MASTER_LOOTER_4"] = "Master Looter 4"
     L["OPTION_MASTER_LOOTER_5"] = "Master Looter 5"
 
+    L["OPTION_ALLOW_DBSYNC"] = "Datenbanksync zulassen"
+
     -- commands
     L["COMMAND_HELP"] = "Zeigt diese Befehls-Liste an."
     L["COMMAND_COUNCIL"] = "Zeigt das Council-Fenster an."
     L["COMMAND_HISTORY"] = "Zeigt die Loothistorie an."
     L["COMMAND_SHOW"] = "Zeigt das Loot-Vote-Fenster an."
     L["COMMAND_OPTIONS"] = "Öffnet die AddOn-Einstellungen."
+    L["COMMAND_SYNCDB"] = "Synchronisiert die Datenbank. WIP"
 
     -- errors etc
     L["ERROR_COMMAND_ALREADY_REGISTERED"] = "Chat-Befehl '%s' wurde bereits registriert, und wird daher ignoriert. Callstack ist %s"
+
+    --RandomAssignMessages
+    L["RANDOM_ASSIGN_MESSAGE_1"] = "Juhu!"
+    L["RANDOM_ASSIGN_MESSAGE_2"] = "Leider Geil!"
+    L["RANDOM_ASSIGN_MESSAGE_3"] = "Ist das denn die Möglichkeit?!"
+    L["RANDOM_ASSIGN_MESSAGE_4"] = "Hier könnte Ihre Werbung stehen!"
+    L["RANDOM_ASSIGN_MESSAGE_5"] = "Wubdidooh!"
+    L["RANDOM_ASSIGN_MESSAGE_6"] = "Absolut Klasse!"
+    L["RANDOM_ASSIGN_MESSAGE_7"] = "Megakrass!"
+    L["RANDOM_ASSIGN_MESSAGE_8"] = "Digga!"
 end

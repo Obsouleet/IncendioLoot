@@ -3,6 +3,7 @@ local L = addon.L
 
 L["YES"] = "Yes"
 L["NO"] = "No"
+L["HISTORY_NOT_AVAILABLE"] = "No History available"
 
 L["NO_VOTE"] = "?"
 L["ASSIGN_ITEM"] = "Would you like to assign the item?"
@@ -28,13 +29,17 @@ L["VOTE_STATE_OTHER"] = "Other"
 L["VOTE_STATE_PASS"] = "Pass"
 
 -- loot council
-L["COUNCIL_ASSIGNED_ITEM"] = "The item %s was assigned to %s."
+L["COUNCIL_ASSIGNED_ITEM"] = "Item %s has been assigned to %s.  %s"
 
 -- loot history
 L["HISTORY"] = "Loot history"
 L["HISTORY_FILTER_DATE"] = "Filter date:"
 L["HISTORY_FILTER_ITEM"] = "Filter item:"
 L["HISTORY_FILTER_PLAYER"] = "Filter player:"
+
+--Loot database
+L["SYNC_NOT_ACTIVATED"] = "Someone has tried to sync a database with you, but the function is not active."
+L["SYNC_SUCCESS"] = "%s has been synchronized to the database."
 
 -- options
 L["OPTION_GENERAL"] = "General"
@@ -64,12 +69,25 @@ L["OPTION_MASTER_LOOTER_3"] = "Master Looter 3"
 L["OPTION_MASTER_LOOTER_4"] = "Master Looter 4"
 L["OPTION_MASTER_LOOTER_5"] = "Master Looter 5"
 
+L["OPTION_ALLOW_DBSYNC"] = "Allow Databasesync"
+
 -- commands
 L["COMMAND_HELP"] = "Displays this command list."
 L["COMMAND_COUNCIL"] = "Displays the loot council window."
 L["COMMAND_HISTORY"] = "Displays the loot history."
 L["COMMAND_SHOW"] = "Displays the loot vote frame."
 L["COMMAND_OPTIONS"] = "Opens the AddOn settings."
+L["COMMAND_SYNCDB"] = "Synchronize the Database. WIP"
 
 -- errors etc
 L["ERROR_COMMAND_ALREADY_REGISTERED"] = "Chat command '%s' has already been registered, and is therefore being ignored. Callstack is %s"
+
+--RandomAssignMessages
+L["RANDOM_ASSIGN_MESSAGE_1"] = "Yay!"
+L["RANDOM_ASSIGN_MESSAGE_2"] = "Too Cool!"
+L["RANDOM_ASSIGN_MESSAGE_3"] = "Is this possible?!"
+L["RANDOM_ASSIGN_MESSAGE_4"] = "Here could be your advertisement!"
+L["RANDOM_ASSIGN_MESSAGE_5"] = "Wubdidooh!"
+L["RANDOM_ASSIGN_MESSAGE_6"] = "Excellent!"
+L["RANDOM_ASSIGN_MESSAGE_7"] = "Outstanding!"
+L["RANDOM_ASSIGN_MESSAGE_8"] = "Marvellous!"
