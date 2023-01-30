@@ -81,6 +81,7 @@ if GetLocale() == "deDE" then
     L["COMMAND_OPTIONS"] = "Öffnet die AddOn-Einstellungen."
     L["COMMAND_SYNCDB"] = "Synchronisiert die Datenbank. WIP"
     L["COMMAND_ADDITEM"] = "Fügt ein Item zum verollen hinzu."
+    L["COMMAND_VERSION_CHECK"] = "Führt die IncendioLoot-Addon-Version deiner Gruppe auf."
 
     -- errors etc
     L["ERROR_COMMAND_ALREADY_REGISTERED"] = "Chat-Befehl '%s' wurde bereits registriert, und wird daher ignoriert. Callstack ist %s"
@@ -94,4 +95,9 @@ if GetLocale() == "deDE" then
     L["RANDOM_ASSIGN_MESSAGE_6"] = "Absolut Klasse!"
     L["RANDOM_ASSIGN_MESSAGE_7"] = "Megakrass!"
     L["RANDOM_ASSIGN_MESSAGE_8"] = "Digga!"
+    
+    -- Version Check
+    L["VCHK_NAME"] = "Spieler"
+    L["VCHK_VERSION"] = "Version"
+    L["VCHK_ACTIVE"] = "Aktiv"
 end
