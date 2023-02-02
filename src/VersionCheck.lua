@@ -153,10 +153,8 @@ end
 local function HandleVersionRequestEvent(_, data, _, sender)
     if UnitName("player") == sender then return end
 
-    print(data)
     local filteredData = data:match("^s!!") and data:gsub("^s!!", "") or nil
     if filteredData ~= nil then
-        print(filteredData)
         local ver, isActive = string.split("|", filteredData)
         InsertVersion(sender, ver, isActive)
 
