@@ -51,6 +51,7 @@ end
 
 local function CreateScrollingTable()
     if FrameHolder ~= nil then
+        FrameHolder.st = nil
         FrameHolder:Hide()
     else
         FrameHolder = CreateFrame("Frame", "VersionCheckFrameHolder", UIParent, "BackdropTemplate")
@@ -91,7 +92,7 @@ local function CreateScrollingTable()
             ["width"] = 50,
             ["align"] = "CENTER"
         }
-    }, numRows, 20, nil, FrameHolder)
+    }, 15, 20, nil, FrameHolder)
 
     local data = {}
 
@@ -119,7 +120,6 @@ local function CreateScrollingTable()
     end
 
     FrameHolder.st:SetData(data)
-    FrameHolder.st:SortData()
     FrameHolder.st.frame:SetPoint("TOP", FrameHolder, "TOP", 0, -50)
     FrameHolder:Show()
 end
@@ -159,7 +159,7 @@ local function HandleVersionRequestEvent(_, data, _, sender)
         InsertVersion(sender, ver, isActive)
 
         if FrameHolder and FrameHolder.st then
-            FrameHolder.st:SortData()
+            FrameHolder.st:Refresh()
         end
     else
         -- respond to request
