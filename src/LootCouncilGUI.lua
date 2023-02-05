@@ -124,8 +124,8 @@ StaticPopupDialogs["IL_ENDSESSION"] = {
 
 StaticPopupDialogs["IL_ASSIGNITEM"] = {
     text = L["ASSIGN_ITEM"],
-    button1 = "Yes",
-    button2 = "No",
+    button1 = L["YES"],
+    button2 = L["NO"],
     OnAccept = function(self, data, data2)
         if not UnitIsGroupLeader("player") then
             DEFAULT_CHAT_FRAME:AddMessage("Dies darf nur der Masterlooter tun!", 1, 0, 0)
@@ -180,7 +180,7 @@ local function ScrollFrameMenu(button)
         local menu = CreateFrame("Frame", "ILScrollFrameMenu", UIParent, "UIDropDownMenuTemplate")
         EasyMenu(menuList, menu, "cursor", 0, 0, "MENU")
     end
-  end
+end
   
 
 function IncendioLootLootCouncilGUI.CreateScrollFrame(index)
