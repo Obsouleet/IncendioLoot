@@ -12,6 +12,7 @@ locale/DE.lua
 src/IncendioLoot.lua
 src/DataHandler.lua
 src/LootCouncil.lua
+src/LootVotingHelper.lua
 src/LootVoting.lua 
 src/LootCouncilGUI.lua
 src/OptionsPane.lua
